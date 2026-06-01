@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FF000000">
+
+    <ImageButton
+        android:id="@+id/btnRotate"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:background="@drawable/icon_button_bg"
+        android:padding="8dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/rotate"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.05" />
+
+    <androidx.camera.view.PreviewView
+        android:id="@+id/previewView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="20dp"
+        android:scaleType="fitCenter"
+        app:layout_constraintDimensionRatio="3:4"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnRotate"
+        app:layout_constraintWidth_percent="0.6" />
+
+    <ImageView
+        android:id="@+id/processedFrame"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="20dp"
+        android:scaleType="fitCenter"
+        android:visibility="gone"
+        app:layout_constraintDimensionRatio="3:4"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnRotate"
+        app:layout_constraintWidth_percent="0.6" />
+
+    <TextView
+        android:id="@+id/streamingText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:lineSpacingExtra="4dp"
+        android:textColor="#FFFFFFFF"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.7" />
+
+    <LinearLayout
+        android:id="@+id/iconRow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/streamingText">
+
+        <ImageButton
+            android:id="@+id/btnFlipCamera"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:background="@drawable/icon_button_bg"
+            android:padding="8dp"
+            android:layout_margin="5dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/camera" />
+
+        <ImageButton
+            android:id="@+id/btnFilters"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:background="@drawable/icon_button_bg"
+            android:padding="8dp"
+            android:layout_margin="5dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/filters" />
+
+        <ImageButton
+            android:id="@+id/btnBgd"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:background="@drawable/icon_button_bg"
+            android:padding="8dp"
+            android:layout_margin="5dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/bgd" />
+
+        <ImageButton
+            android:id="@+id/btnCenter"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:background="@drawable/icon_button_bg"
+            android:padding="8dp"
+            android:layout_margin="5dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/center" />
+
+    </LinearLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/disconnectBtn"
+        android:layout_width="0dp"
+        android:layout_height="60dp"
+        android:text="@string/disconnect"
+        android:textColor="#FF000000"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:backgroundTint="#FFFFFF"
+        app:cornerRadius="15dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.95"
+        app:layout_constraintWidth_percent="0.9" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

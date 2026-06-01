@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IP Camera</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div id="placeholder">Ожидание подключения</div>
+  <canvas id="frame"></canvas>
+
+  <div id="controls">
+    <button id="btnRotate" title="Переворот"><img src="/static/rotate.png" alt="↻"></button>
+    <button id="btnFlip" title="Смена камеры"><img src="/static/camera.png" alt="⇄"></button>
+    <button id="btnFilters" title="Фильтры"><img src="/static/filters.png" alt="◇"></button>
+    <button id="btnBg" title="Размытие фона"><img src="/static/bgd.png" alt="⊙"></button>
+    <button id="btnCenter" title="Удержание в центре"><img src="/static/center.png" alt="◈"></button>
+  </div>
+
+  <div id="filterOverlay"></div>
+  <div id="filterDialog">
+    <div class="filter-option" data-filter="none">
+      <div class="filter-square none"></div>
+      <span class="filter-label">Нет</span>
+    </div>
+    <div class="filter-option" data-filter="cold">
+      <div class="filter-square cold"></div>
+      <span class="filter-label">Холодный</span>
+    </div>
+    <div class="filter-option" data-filter="warm">
+      <div class="filter-square warm"></div>
+      <span class="filter-label">Тёплый</span>
+    </div>
+    <div class="filter-option" data-filter="effect">
+      <div class="filter-square effect"></div>
+      <span class="filter-label">Эффектный</span>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

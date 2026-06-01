@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Видеопорт</string>
+    <string name="disconnect">Отключиться</string>
+    <string name="enterIP">Введите IP-адрес сервера:</string>
+    <string name="exampleIP">127.0.0.1:8000</string>
+    <string name="connect">Подключиться</string>
+</resources>

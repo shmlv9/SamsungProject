@@ -1,0 +1,15 @@
+.DS_Store
+.idea/
+__pycache__/
+*.pyc
+venv/
+*.iml
+.gradle/
+build/
+local.properties
+.vscode/
+.env
+*.log
+.externalNativeBuild/
+.cxx/
+captures/
