@@ -29,6 +29,11 @@ class FrameProcessor {
     private static final int FACE_DETECTION_MAX_DIM = 960;
     private static final int CENTER_LOCK_FRAME_INTERVAL = 2;
 
+    private Bitmap backgroundBitmap;
+    private int[] bgPixels;
+    private int bgWidth;
+    private int bgHeight;
+
     private Segmenter segmenter;
     private FaceDetector faceDetector;
     private final Paint filterPaint = new Paint();
@@ -42,6 +47,23 @@ class FrameProcessor {
 
     void setProcessedFrameListener(ProcessedFrameListener listener) {
         this.processedFrameListener = listener;
+    }
+
+    void setBackgroundBitmap(Bitmap bitmap) {
+        if (backgroundBitmap != null) {
+            backgroundBitmap.recycle();
+        }
+        backgroundBitmap = bitmap;
+        if (bitmap != null) {
+            bgWidth = bitmap.getWidth();
+            bgHeight = bitmap.getHeight();
+            bgPixels = new int[bgWidth * bgHeight];
+            bitmap.getPixels(bgPixels, 0, bgWidth, 0, 0, bgWidth, bgHeight);
+        } else {
+            bgPixels = null;
+            bgWidth = 0;
+            bgHeight = 0;
+        }
     }
 
     Bitmap processBitmap(Bitmap bitmap, int filter, boolean bgBlur, boolean centerLock,
@@ -94,6 +116,15 @@ class FrameProcessor {
             new Handler(Looper.getMainLooper()).post(() -> processedFrameListener.onFrame(previewCopy));
         }
 
+        if (mirrorPreview) {
+            Matrix mirror = new Matrix();
+            mirror.preScale(-1, 1);
+            Bitmap mirrored = Bitmap.createBitmap(bitmap, 0, 0,
+                    bitmap.getWidth(), bitmap.getHeight(), mirror, false);
+            bitmap.recycle();
+            bitmap = mirrored;
+        }
+
         if (rotationDegrees != 0) {
             Matrix matrix = new Matrix();
             matrix.postRotate(-rotationDegrees);
@@ -141,10 +172,20 @@ class FrameProcessor {
                     }
 
                     float bgStrength = Math.max(0, 1f - confidence * 2);
-                    int a = (int)((op >> 24 & 0xFF) * (1 - bgStrength) + (bp >> 24 & 0xFF) * bgStrength);
-                    int r = (int)((op >> 16 & 0xFF) * (1 - bgStrength) + (bp >> 16 & 0xFF) * bgStrength);
-                    int g = (int)((op >> 8 & 0xFF) * (1 - bgStrength) + (bp >> 8 & 0xFF) * bgStrength);
-                    int b = (int)((op & 0xFF) * (1 - bgStrength) + (bp & 0xFF) * bgStrength);
+
+                    int srcPixel;
+                    if (bgPixels != null) {
+                        int bgX = Math.min(x * bgWidth / width, bgWidth - 1);
+                        int bgY = Math.min(y * bgHeight / height, bgHeight - 1);
+                        srcPixel = bgPixels[bgY * bgWidth + bgX];
+                    } else {
+                        srcPixel = bp;
+                    }
+
+                    int a = (int)((op >> 24 & 0xFF) * (1 - bgStrength) + (srcPixel >> 24 & 0xFF) * bgStrength);
+                    int r = (int)((op >> 16 & 0xFF) * (1 - bgStrength) + (srcPixel >> 16 & 0xFF) * bgStrength);
+                    int g = (int)((op >> 8 & 0xFF) * (1 - bgStrength) + (srcPixel >> 8 & 0xFF) * bgStrength);
+                    int b = (int)((op & 0xFF) * (1 - bgStrength) + (srcPixel & 0xFF) * bgStrength);
                     blurredPixels[idx] = (a << 24) | (r << 16) | (g << 8) | b;
                 }
             }
@@ -273,5 +314,10 @@ class FrameProcessor {
             faceDetector.close();
             faceDetector = null;
         }
+        if (backgroundBitmap != null) {
+            backgroundBitmap.recycle();
+            backgroundBitmap = null;
+        }
+        bgPixels = null;
     }
 }

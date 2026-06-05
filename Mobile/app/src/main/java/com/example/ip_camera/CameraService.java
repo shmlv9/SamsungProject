@@ -72,6 +72,10 @@ public class CameraService implements ImageAnalysis.Analyzer {
         mirrorPreview = mirror;
     }
 
+    public void setBackgroundBitmap(Bitmap bitmap) {
+        frameProcessor.setBackgroundBitmap(bitmap);
+    }
+
     public void sendState(String jsonState) {
         networkClient.sendState(jsonState);
     }
@@ -110,7 +114,8 @@ public class CameraService implements ImageAnalysis.Analyzer {
         boolean needsProcessing = rotationDegrees != 0
                 || currentFilter != FilterConstants.NONE
                 || bgBlurEnabled
-                || centerLockEnabled;
+                || centerLockEnabled
+                || mirrorPreview;
 
         byte[] jpegBytes;
 

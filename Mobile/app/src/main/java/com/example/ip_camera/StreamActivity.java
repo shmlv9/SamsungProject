@@ -1,6 +1,8 @@
 package com.example.ip_camera;
 
 import android.app.Dialog;
+import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
@@ -38,6 +40,7 @@ public class StreamActivity extends AppCompatActivity {
     private MaterialButton disconnectBtn;
     private ImageButton btnFlipCamera;
     private ImageButton btnRotate;
+    private ImageButton btnSettings;
     private ImageButton btnFilters;
     private ImageButton btnBgd;
     private ImageButton btnCenter;
@@ -61,6 +64,7 @@ public class StreamActivity extends AppCompatActivity {
         disconnectBtn = findViewById(R.id.disconnectBtn);
         btnFlipCamera = findViewById(R.id.btnFlipCamera);
         btnRotate = findViewById(R.id.btnRotate);
+        btnSettings = findViewById(R.id.btnSettings);
         btnFilters = findViewById(R.id.btnFilters);
         btnBgd = findViewById(R.id.btnBgd);
         btnCenter = findViewById(R.id.btnCenter);
@@ -119,6 +123,9 @@ public class StreamActivity extends AppCompatActivity {
 
         btnFlipCamera.setOnClickListener(v -> flipCamera());
         btnRotate.setOnClickListener(v -> rotateFrame());
+        btnSettings.setOnClickListener(v -> {
+            startActivity(new Intent(this, SettingsActivity.class));
+        });
         btnFilters.setOnClickListener(v -> showFilterDialog());
         btnBgd.setOnClickListener(v -> applyBgBlur(!cameraService.isBgBlurEnabled(), true));
         btnCenter.setOnClickListener(v -> applyCenterLock(!cameraService.isCenterLockEnabled(), true));
@@ -276,6 +283,16 @@ public class StreamActivity extends AppCompatActivity {
                 .build();
 
         provider.bindToLifecycle(this, cameraSelector, preview, analysis);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (cameraService != null) {
+            Bitmap bg = SettingsActivity.hasBackgroundImage(this)
+                    ? SettingsActivity.loadBackgroundBitmap(this) : null;
+            cameraService.setBackgroundBitmap(bg);
+        }
     }
 
     @Override

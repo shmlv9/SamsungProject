@@ -4,4 +4,10 @@
     <string name="enterIP">Введите IP-адрес сервера:</string>
     <string name="exampleIP">127.0.0.1:8000</string>
     <string name="connect">Подключиться</string>
+    <string name="settings_bg_title">Фоновое изображение</string>
+    <string name="settings_bg_choose">Выбрать</string>
+    <string name="settings_bg_remove">Убрать</string>
+    <string name="settings_bg_empty">Не выбрано</string>
+    <string name="settings_title">Настройки</string>
+    <string name="settings_apply">Применить</string>
 </resources>

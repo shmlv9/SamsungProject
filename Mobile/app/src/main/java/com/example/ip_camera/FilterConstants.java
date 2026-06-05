@@ -14,13 +14,13 @@ public class FilterConstants {
                 return new ColorMatrix(new float[]{
                         0.8f, 0, 0, 0, 0,
                         0, 0.9f, 0, 0, 0,
-                        0, 0, 1.2f, 0, 10,
+                        0, 0, 1.1f, 0, 10,
                         0, 0, 0, 1, 0
                 });
             case WARM:
                 return new ColorMatrix(new float[]{
-                        1.2f, 0, 0, 0, 25,
-                        0, 1.1f, 0, 0, 10,
+                        1.05f, 0, 0, 0, 25,
+                        0, 1, 0, 0, 10,
                         0, 0, 0.8f, 0, 0,
                         0, 0, 0, 1, 0
                 });
