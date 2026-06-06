@@ -34,6 +34,10 @@
             android:exported="false"
             android:screenOrientation="portrait" />
         <activity
+            android:name=".OnboardingActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".StreamActivity"
             android:exported="false"
             android:screenOrientation="portrait" />

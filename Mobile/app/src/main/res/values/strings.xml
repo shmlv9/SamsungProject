@@ -10,4 +10,13 @@
     <string name="settings_bg_empty">Не выбрано</string>
     <string name="settings_title">Настройки</string>
     <string name="settings_apply">Применить</string>
+    <string name="onb_title_1">IP-камера с AI-эффектами</string>
+    <string name="onb_desc_1">Приложение превращает ваш телефон в профессиональную IP-камеру. Подключитесь к серверу и транслируйте видео на компьютер в реальном времени.</string>
+    <string name="onb_title_2">Фильтры и AI-функции</string>
+    <string name="onb_desc_2">Накладывайте цветовые фильтры, размывайте фон или заменяйте его на своё изображение. Функция удержания лица в кадре автоматически следует за вами.</string>
+    <string name="onb_title_3">Конфиденциальность</string>
+    <string name="onb_desc_3">Все данные обрабатываются локально на вашем устройстве. Видео не покидает вашу локальную сеть и не сохраняется на сторонних серверах.</string>
+    <string name="onb_continue">Продолжить</string>
+    <string name="onb_start">Начать</string>
+    <string name="next">Продолжить</string>
 </resources>
