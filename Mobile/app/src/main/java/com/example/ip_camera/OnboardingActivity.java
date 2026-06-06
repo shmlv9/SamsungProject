@@ -41,7 +41,7 @@ public class OnboardingActivity extends AppCompatActivity {
         updatePage();
 
         btnContinue.setOnClickListener(v -> {
-            if (currentPage < 2) {
+            if (currentPage < images.length - 1) {
                 currentPage++;
                 updatePage();
             } else {
@@ -63,7 +63,7 @@ public class OnboardingActivity extends AppCompatActivity {
                     ? R.drawable.dot_active : R.drawable.dot_inactive);
         }
 
-        if (currentPage == 2) {
+        if (currentPage == images.length - 1) {
             btnContinue.setText(R.string.onb_start);
         } else {
             btnContinue.setText(R.string.onb_continue);

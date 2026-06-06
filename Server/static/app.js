@@ -1,6 +1,6 @@
 const canvas = document.getElementById('frame');
 const ctx = canvas.getContext('2d');
-const placeholder = document.getElementById('placeholder');
+const beforeConnect = document.getElementById('beforeConnect');
 const controls = document.getElementById('controls');
 const wsUrl = `ws://${location.host}/ws/view`;
 const img = new Image();
@@ -43,7 +43,7 @@ function hideFilterDialog() {
 
 function showFrame() {
   canvas.style.display = 'block';
-  placeholder.style.display = 'none';
+  beforeConnect.style.display = 'none';
   controls.style.display = 'flex';
 }
 
@@ -52,7 +52,7 @@ function showPlaceholder() {
   canvas.width = 0;
   canvas.height = 0;
   canvas.style.display = 'none';
-  placeholder.style.display = 'block';
+  beforeConnect.style.display = 'flex';
   controls.style.display = 'none';
 }
 

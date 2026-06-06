@@ -11,7 +11,7 @@ import java.io.ByteArrayOutputStream;
 
 public class CameraService implements ImageAnalysis.Analyzer {
 
-    private static final long MIN_INTERVAL_MS = 33;
+    private static final long MIN_INTERVAL_MS = 50;
 
     private final NetworkClient networkClient;
     private final FrameProcessor frameProcessor;
@@ -46,10 +46,6 @@ public class CameraService implements ImageAnalysis.Analyzer {
 
     public void setFilter(int filter) {
         currentFilter = filter;
-    }
-
-    public int getFilter() {
-        return currentFilter;
     }
 
     public void setBgBlur(boolean enabled) {
@@ -114,8 +110,7 @@ public class CameraService implements ImageAnalysis.Analyzer {
         boolean needsProcessing = rotationDegrees != 0
                 || currentFilter != FilterConstants.NONE
                 || bgBlurEnabled
-                || centerLockEnabled
-                || mirrorPreview;
+                || centerLockEnabled;
 
         byte[] jpegBytes;
 

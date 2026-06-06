@@ -38,6 +38,19 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintVertical_bias="0.5" />
 
+    <ImageButton
+        android:id="@+id/btnQr"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="20dp"
+        android:background="@android:color/transparent"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/qrcode"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/connectBtn"
         android:layout_width="0dp"

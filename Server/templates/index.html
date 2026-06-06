@@ -7,7 +7,12 @@
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <div id="placeholder">Ожидание подключения</div>
+  <div id="beforeConnect">
+    <p id="waitingText">Ожидание подключения, ваш IP:<br>{{LAN_IP}}:8000</p>
+    <img id="qrCode" src="data:image/png;base64,{{QR_CODE}}" alt="QR">
+    <p id="qrHint">Отсканируйте QR-код в приложении, чтобы подключиться</p>
+  </div>
+
   <canvas id="frame"></canvas>
 
   <div id="controls">

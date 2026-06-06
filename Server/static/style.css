@@ -1,37 +1,161 @@
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; font-family: sans-serif; }
-canvas { max-width: 100%; max-height: 100vh; display: none; }
-#placeholder { color: #888; font-size: 20px; }
-
-#controls { position: fixed; top: 8px; left: 8px; display: none; gap: 4px; }
-#controls button {
-  width: 44px; height: 44px; border: none; border-radius: 8px;
-  background: rgba(255,255,255,0.2);
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-  backdrop-filter: blur(4px); transition: background 0.15s;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
-#controls button:hover { background: rgba(255,255,255,0.4); }
-#controls button.active { background: #FFD700; }
-#controls button.active:hover { background: #E6C200; }
-#controls button img { width: 28px; height: 28px; display: block; pointer-events: none; }
+
+body {
+  background: #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  overflow: hidden;
+  font-family: sans-serif;
+}
+
+canvas {
+  max-width: 100%;
+  max-height: 100vh;
+  display: none;
+}
+
+
+/* ----- Before-connect / QR section ----- */
+
+#beforeConnect {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+#waitingText {
+  color: #888;
+  font-size: 24px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+#qrCode {
+  width: 240px;
+  height: 240px;
+  border-radius: 12px;
+}
+
+#qrHint {
+  color: #666;
+  font-size: 15px;
+  text-align: center;
+  max-width: 280px;
+  line-height: 1.4;
+}
+
+
+/* ----- Controls (top-left button bar) ----- */
+
+#controls {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  display: none;
+  gap: 4px;
+}
+
+#controls button {
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  transition: background 0.15s;
+}
+
+#controls button:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+#controls button.active {
+  background: #ffd700;
+}
+
+#controls button.active:hover {
+  background: #e6c200;
+}
+
+#controls button img {
+  width: 28px;
+  height: 28px;
+  display: block;
+  pointer-events: none;
+}
+
+
+/* ----- Filter dialog ----- */
 
 #filterOverlay {
-  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 99;
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 99;
 }
+
 #filterDialog {
-  display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
-  background: #1A1A1A; border-radius: 16px; padding: 24px; z-index: 100;
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #1a1a1a;
+  border-radius: 16px;
+  padding: 24px;
+  z-index: 100;
 }
+
 .filter-option {
-  display: flex; align-items: center; padding: 8px 0; cursor: pointer;
-  border-radius: 8px; padding: 8px 12px; transition: background 0.15s;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 8px 12px;
+  transition: background 0.15s;
 }
-.filter-option:hover { background: rgba(255,255,255,0.1); }
+
+.filter-option:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
 .filter-square {
-  width: 32px; height: 32px; border-radius: 8px; margin-right: 14px; flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  margin-right: 14px;
+  flex-shrink: 0;
 }
-.filter-square.none { background: #FFFFFF; }
-.filter-square.cold { background: #4488FF; }
-.filter-square.warm { background: #FF8800; }
-.filter-square.effect { background: #FF3366; }
-.filter-label { color: #FFFFFF; font-size: 15px; }
+
+.filter-square.none {
+  background: #fff;
+}
+
+.filter-square.cold {
+  background: #4488ff;
+}
+
+.filter-square.warm {
+  background: #ff8800;
+}
+
+.filter-square.effect {
+  background: #ff3366;
+}
+
+.filter-label {
+  color: #fff;
+  font-size: 15px;
+}

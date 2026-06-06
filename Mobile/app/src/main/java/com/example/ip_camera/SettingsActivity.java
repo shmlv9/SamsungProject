@@ -16,6 +16,7 @@ import com.google.android.material.button.MaterialButton;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -85,14 +86,14 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void saveBackgroundImage(Uri uri) {
-        try {
-            Bitmap bitmap = BitmapFactory.decodeStream(getContentResolver().openInputStream(uri));
+        try (InputStream is = getContentResolver().openInputStream(uri)) {
+            Bitmap bitmap = BitmapFactory.decodeStream(is);
             if (bitmap == null) return;
 
             File bgFile = new File(getFilesDir(), "background.jpg");
-            FileOutputStream fos = new FileOutputStream(bgFile);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, fos);
-            fos.close();
+            try (FileOutputStream fos = new FileOutputStream(bgFile)) {
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 90, fos);
+            }
             bitmap.recycle();
 
             getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -100,7 +101,7 @@ public class SettingsActivity extends AppCompatActivity {
                     .putBoolean(KEY_BG_EXISTS, true)
                     .apply();
         } catch (Exception e) {
-            bgStatus.setText("Ошибка загрузки");
+            bgStatus.setText(R.string.settings_bg_error);
         }
     }
 

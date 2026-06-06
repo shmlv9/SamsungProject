@@ -43,6 +43,7 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.mlkit.segmentation.selfie)
     implementation(libs.mlkit.face.detection)
+    implementation(libs.mlkit.barcode.scanning)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

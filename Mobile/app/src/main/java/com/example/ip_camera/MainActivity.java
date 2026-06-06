@@ -6,8 +6,11 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -31,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
 
     private EditText ipInput;
     private MaterialButton connectBtn;
+    private ImageButton btnQr;
     private final OkHttpClient client = new OkHttpClient.Builder()
             .connectTimeout(3, TimeUnit.SECONDS)
             .readTimeout(3, TimeUnit.SECONDS)
@@ -39,6 +43,23 @@ public class MainActivity extends AppCompatActivity {
     private String pendingBaseUrl;
     private String pendingServerUrl;
 
+    private final ActivityResultLauncher<Intent> qrLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    String url = result.getData().getStringExtra(QrScannerActivity.EXTRA_RESULT);
+                    if (url != null) {
+                        String hostPort = url.replace("http://", "").replace("https://", "");
+                        if (hostPort.contains("/")) {
+                            hostPort = hostPort.substring(0, hostPort.indexOf("/"));
+                        }
+                        Intent intent = new Intent(this, StreamActivity.class);
+                        intent.putExtra(StreamActivity.EXTRA_SERVER_URL,
+                                "http://" + hostPort + "/upload");
+                        startActivity(intent);
+                    }
+                }
+            });
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,9 +67,12 @@ public class MainActivity extends AppCompatActivity {
 
         ipInput = findViewById(R.id.ipInput);
         connectBtn = findViewById(R.id.connectBtn);
+        btnQr = findViewById(R.id.btnQr);
 
         getWindow().setStatusBarColor(Color.BLACK);
         connectBtn.setOnClickListener(v -> onConnectClick());
+        btnQr.setOnClickListener(v ->
+                qrLauncher.launch(new Intent(this, QrScannerActivity.class)));
     }
 
     private void onConnectClick() {
@@ -131,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
                     checkServerAndConnect();
                 }
             } else {
-                Toast.makeText(this, "Camera permission required", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Требуется разрешение камеры", Toast.LENGTH_LONG).show();
                 pendingConnect = false;
             }
         }

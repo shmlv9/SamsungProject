@@ -25,7 +25,7 @@ import okio.ByteString;
 class NetworkClient {
     private static final String TAG = "NetworkClient";
     private static final long COMMAND_POLL_INTERVAL_MS = 500;
-    private static final long MAX_RECONNECT_DELAY_MS = 30000;
+    private static final long MAX_RECONNECT_DELAY_MS = 5000;
 
     private final String httpUrl;
     private final String cmdPollUrl;
@@ -38,7 +38,7 @@ class NetworkClient {
     private Handler reconnectHandler;
     private Handler commandPollHandler;
     private boolean running;
-    private long reconnectDelayMs = 1000;
+    private long reconnectDelayMs = 2000;
     private CommandListener commandListener;
 
     interface CommandListener {
@@ -60,7 +60,8 @@ class NetworkClient {
         client = new OkHttpClient.Builder()
                 .connectTimeout(3, TimeUnit.SECONDS)
                 .writeTimeout(3, TimeUnit.SECONDS)
-                .readTimeout(0, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .pingInterval(10, TimeUnit.SECONDS)
                 .build();
     }
 

@@ -2,12 +2,15 @@ import asyncio
 import json
 import logging
 from contextlib import asynccontextmanager
+from io import BytesIO
 from pathlib import Path
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
 from fastapi.responses import Response, HTMLResponse
 from fastapi.staticfiles import StaticFiles
+from PIL import Image
 
+from qrcode_utils import generate_qr_base64, get_lan_ip
 from virtual_cam import VirtualCamera
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -18,10 +21,15 @@ viewers: set[WebSocket] = set()
 phone_ws: WebSocket | None = None
 command_queue: list[str] = []
 virtual_cam = VirtualCamera()
+lan_ip: str | None = None
+lan_qr: str | None = None
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    global lan_ip, lan_qr
+    lan_ip = get_lan_ip()
+    lan_qr = generate_qr_base64(f"http://{lan_ip}:8000")
     virtual_cam.start(lambda: frame_buffer)
     yield
     virtual_cam.stop()
@@ -31,10 +39,22 @@ app = FastAPI(title="IP Camera Server", lifespan=lifespan)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
+def _mirror_jpeg(data: bytes) -> bytes:
+    img = Image.open(BytesIO(data))
+    img = img.transpose(Image.FLIP_LEFT_RIGHT)
+    buf = BytesIO()
+    img.save(buf, "JPEG")
+    return buf.getvalue()
+
+
 async def broadcast(data: bytes):
     global viewers
     if not viewers:
         return
+
+    if current_state.get("mirror"):
+        data = _mirror_jpeg(data)
+
     dead: set[WebSocket] = set()
 
     async def send(v: WebSocket):
@@ -158,6 +178,8 @@ async def preview():
 @app.get("/")
 async def index():
     html = (Path(__file__).parent / "templates" / "index.html").read_text()
+    html = html.replace("{{LAN_IP}}", lan_ip or "127.0.0.1")
+    html = html.replace("{{QR_CODE}}", lan_qr or "")
     return HTMLResponse(html)
 
 

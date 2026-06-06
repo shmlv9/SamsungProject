@@ -138,6 +138,7 @@ public class StreamActivity extends AppCompatActivity {
         getWindow().setStatusBarColor(Color.BLACK);
         cameraService.start();
         startCamera();
+        sendFullState();
     }
 
     private void flipCamera() {
@@ -163,6 +164,7 @@ public class StreamActivity extends AppCompatActivity {
 
         lensFacing = newLens;
         cameraService.setMirrorPreview(lensFacing == CameraSelector.LENS_FACING_FRONT);
+        sendFullState();
         cameraProvider.unbindAll();
         bindCameraUseCases(cameraProvider);
     }
@@ -185,22 +187,22 @@ public class StreamActivity extends AppCompatActivity {
 
         dialog.findViewById(R.id.optionNone).setOnClickListener(v -> {
             applyFilter(FilterConstants.NONE);
-            cameraService.sendState("{\"type\":\"state\",\"filter\":\"none\"}");
+            sendFullState();
             dialog.dismiss();
         });
         dialog.findViewById(R.id.optionCold).setOnClickListener(v -> {
             applyFilter(FilterConstants.COLD);
-            cameraService.sendState("{\"type\":\"state\",\"filter\":\"cold\"}");
+            sendFullState();
             dialog.dismiss();
         });
         dialog.findViewById(R.id.optionWarm).setOnClickListener(v -> {
             applyFilter(FilterConstants.WARM);
-            cameraService.sendState("{\"type\":\"state\",\"filter\":\"warm\"}");
+            sendFullState();
             dialog.dismiss();
         });
         dialog.findViewById(R.id.optionEffect).setOnClickListener(v -> {
             applyFilter(FilterConstants.EFFECT);
-            cameraService.sendState("{\"type\":\"state\",\"filter\":\"effect\"}");
+            sendFullState();
             dialog.dismiss();
         });
 
@@ -227,7 +229,7 @@ public class StreamActivity extends AppCompatActivity {
         btnBgd.setBackgroundResource(enabled ? R.drawable.icon_button_bg_active : R.drawable.icon_button_bg);
         updatePreviewVisibility();
         if (!enabled && !cameraService.isCenterLockEnabled()) processedFrame.setImageBitmap(null);
-        if (sendState) cameraService.sendState("{\"type\":\"state\",\"bg_blur\":" + enabled + "}");
+        if (sendState) sendFullState();
     }
 
     private void applyCenterLock(boolean enabled, boolean sendState) {
@@ -235,13 +237,25 @@ public class StreamActivity extends AppCompatActivity {
         btnCenter.setBackgroundResource(enabled ? R.drawable.icon_button_bg_active : R.drawable.icon_button_bg);
         updatePreviewVisibility();
         if (!enabled && !cameraService.isBgBlurEnabled()) processedFrame.setImageBitmap(null);
-        if (sendState) cameraService.sendState("{\"type\":\"state\",\"center_lock\":" + enabled + "}");
+        if (sendState) sendFullState();
     }
 
     private void updatePreviewVisibility() {
         boolean showProcessed = cameraService.isBgBlurEnabled() || cameraService.isCenterLockEnabled();
         previewView.setVisibility(showProcessed ? View.INVISIBLE : View.VISIBLE);
         processedFrame.setVisibility(showProcessed ? View.VISIBLE : View.GONE);
+    }
+
+    private void sendFullState() {
+        String filterName = "none";
+        if (currentFilter == FilterConstants.COLD) filterName = "cold";
+        else if (currentFilter == FilterConstants.WARM) filterName = "warm";
+        else if (currentFilter == FilterConstants.EFFECT) filterName = "effect";
+
+        cameraService.sendState("{\"type\":\"state\",\"mirror\":" + (lensFacing == CameraSelector.LENS_FACING_FRONT)
+                + ",\"bg_blur\":" + cameraService.isBgBlurEnabled()
+                + ",\"center_lock\":" + cameraService.isCenterLockEnabled()
+                + ",\"filter\":\"" + filterName + "\"}");
     }
 
     private void stopStreaming() {

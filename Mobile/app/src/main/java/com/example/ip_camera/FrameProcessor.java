@@ -2,7 +2,6 @@ package com.example.ip_camera;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
@@ -116,18 +115,9 @@ class FrameProcessor {
             new Handler(Looper.getMainLooper()).post(() -> processedFrameListener.onFrame(previewCopy));
         }
 
-        if (mirrorPreview) {
-            Matrix mirror = new Matrix();
-            mirror.preScale(-1, 1);
-            Bitmap mirrored = Bitmap.createBitmap(bitmap, 0, 0,
-                    bitmap.getWidth(), bitmap.getHeight(), mirror, false);
-            bitmap.recycle();
-            bitmap = mirrored;
-        }
-
         if (rotationDegrees != 0) {
             Matrix matrix = new Matrix();
-            matrix.postRotate(-rotationDegrees);
+            matrix.postRotate(rotationDegrees);
             Bitmap rotated = Bitmap.createBitmap(bitmap, 0, 0,
                     bitmap.getWidth(), bitmap.getHeight(), matrix, true);
             bitmap.recycle();
