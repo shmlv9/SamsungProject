@@ -18,27 +18,17 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import okhttp3.WebSocket;
-import okhttp3.WebSocketListener;
-import okio.ByteString;
 
 class NetworkClient {
     private static final String TAG = "NetworkClient";
     private static final long COMMAND_POLL_INTERVAL_MS = 500;
-    private static final long MAX_RECONNECT_DELAY_MS = 5000;
 
-    private final String httpUrl;
     private final String cmdPollUrl;
     private final String stateUrl;
-    private final String wsUrl;
     private final OkHttpClient client;
 
-    private volatile WebSocket ws;
-    private volatile boolean wsConnected;
-    private Handler reconnectHandler;
     private Handler commandPollHandler;
-    private boolean running;
-    private long reconnectDelayMs = 2000;
+    private volatile boolean running;
     private CommandListener commandListener;
 
     interface CommandListener {
@@ -50,68 +40,25 @@ class NetworkClient {
     }
 
     NetworkClient(String serverUrl) {
-        this.httpUrl = serverUrl;
-        this.wsUrl = serverUrl
-                .replace("http://", "ws://")
-                .replace("https://", "wss://")
-                .replace("/upload", "/ws/upload");
-        this.cmdPollUrl = serverUrl.replace("/upload", "/command");
-        this.stateUrl = serverUrl.replace("/upload", "/state");
+        cmdPollUrl = serverUrl.replace("/upload", "/command");
+        stateUrl = serverUrl.replace("/upload", "/state");
         client = new OkHttpClient.Builder()
                 .connectTimeout(3, TimeUnit.SECONDS)
-                .writeTimeout(3, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
-                .pingInterval(10, TimeUnit.SECONDS)
                 .build();
     }
 
     void start() {
         running = true;
-        reconnectHandler = new Handler(Looper.getMainLooper());
         commandPollHandler = new Handler(Looper.getMainLooper());
-        connectWs();
         startPollingCommands();
     }
 
     void stop() {
         running = false;
-        if (reconnectHandler != null) {
-            reconnectHandler.removeCallbacksAndMessages(null);
-            reconnectHandler = null;
-        }
         if (commandPollHandler != null) {
             commandPollHandler.removeCallbacksAndMessages(null);
             commandPollHandler = null;
         }
-        if (ws != null) {
-            ws.close(1000, "Client closed");
-            ws = null;
-        }
-        wsConnected = false;
-    }
-
-    void sendFrame(byte[] jpegBytes) {
-        if (wsConnected && ws != null) {
-            ws.send(ByteString.of(jpegBytes));
-            return;
-        }
-
-        Request request = new Request.Builder()
-                .url(httpUrl)
-                .post(RequestBody.create(jpegBytes, MediaType.parse("image/jpeg")))
-                .build();
-
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                Log.d(TAG, "HTTP fallback failed: " + e.getMessage());
-            }
-
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) {
-                response.close();
-            }
-        });
     }
 
     void sendState(String jsonState) {
@@ -130,41 +77,6 @@ class NetworkClient {
                 response.close();
             }
         });
-    }
-
-    private void connectWs() {
-        if (!running) return;
-        Request request = new Request.Builder().url(wsUrl).build();
-        client.newWebSocket(request, new WebSocketListener() {
-            @Override
-            public void onOpen(@NonNull WebSocket webSocket, @NonNull Response response) {
-                ws = webSocket;
-                wsConnected = true;
-                reconnectDelayMs = 1000;
-            }
-
-            @Override
-            public void onFailure(@NonNull WebSocket webSocket, @NonNull Throwable t, Response response) {
-                wsConnected = false;
-                ws = null;
-                scheduleReconnect();
-            }
-
-            @Override
-            public void onClosed(@NonNull WebSocket webSocket, int code, @NonNull String reason) {
-                wsConnected = false;
-                ws = null;
-                scheduleReconnect();
-            }
-        });
-    }
-
-    private void scheduleReconnect() {
-        if (!running) return;
-        if (reconnectHandler != null) {
-            reconnectHandler.postDelayed(this::connectWs, reconnectDelayMs);
-            reconnectDelayMs = Math.min(reconnectDelayMs * 2, MAX_RECONNECT_DELAY_MS);
-        }
     }
 
     private void startPollingCommands() {

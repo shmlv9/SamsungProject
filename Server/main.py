@@ -11,6 +11,7 @@ from fastapi.staticfiles import StaticFiles
 from PIL import Image
 
 from qrcode_utils import generate_qr_base64, get_lan_ip
+from udp_receiver import UdpProtocol
 from virtual_cam import VirtualCamera
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -18,7 +19,6 @@ logger = logging.getLogger(__name__)
 
 frame_buffer: bytes | None = None
 viewers: set[WebSocket] = set()
-phone_ws: WebSocket | None = None
 command_queue: list[str] = []
 virtual_cam = VirtualCamera()
 lan_ip: str | None = None
@@ -31,7 +31,22 @@ async def lifespan(app: FastAPI):
     lan_ip = get_lan_ip()
     lan_qr = generate_qr_base64(f"http://{lan_ip}:8000")
     virtual_cam.start(lambda: frame_buffer)
+
+    def on_udp_frame(jpeg: bytes):
+        global frame_buffer
+        frame_buffer = jpeg
+        asyncio.get_event_loop().create_task(broadcast(jpeg))
+
+    loop = asyncio.get_event_loop()
+    udp_transport, _ = await loop.create_datagram_endpoint(
+        lambda: UdpProtocol(on_udp_frame),
+        local_addr=("0.0.0.0", 8001),
+    )
+    logger.info("UDP receiver listening on port 8001")
+
     yield
+
+    udp_transport.close()
     virtual_cam.stop()
 
 
@@ -52,7 +67,8 @@ async def broadcast(data: bytes):
     if not viewers:
         return
 
-    if current_state.get("mirror"):
+    mirror = current_state.get("mirror", False)
+    if mirror:
         data = _mirror_jpeg(data)
 
     dead: set[WebSocket] = set()
@@ -67,26 +83,6 @@ async def broadcast(data: bytes):
     viewers -= dead
 
 
-async def notify_disconnected():
-    global viewers
-    if not viewers:
-        return
-    msg = json.dumps({"event": "phone_disconnected"})
-
-    async def send(v: WebSocket):
-        try:
-            await v.send_text(msg)
-        except Exception:
-            pass
-        try:
-            await v.close(code=1001, reason="phone_disconnected")
-        except Exception:
-            pass
-
-    await asyncio.gather(*[send(v) for v in viewers], return_exceptions=True)
-    viewers.clear()
-
-
 @app.post("/upload")
 async def upload_frame(request: Request):
     global frame_buffer
@@ -96,24 +92,6 @@ async def upload_frame(request: Request):
     frame_buffer = body
     await broadcast(frame_buffer)
     return {"status": "ok", "size": len(frame_buffer)}
-
-
-@app.websocket("/ws/upload")
-async def ws_upload(websocket: WebSocket):
-    global frame_buffer, phone_ws
-    await websocket.accept()
-    phone_ws = websocket
-    try:
-        while True:
-            data = await websocket.receive_bytes()
-            frame_buffer = data
-            await broadcast(data)
-    except Exception:
-        pass
-    finally:
-        phone_ws = None
-        frame_buffer = None
-        await notify_disconnected()
 
 
 @app.websocket("/ws/view")

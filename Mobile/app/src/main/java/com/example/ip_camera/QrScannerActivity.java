@@ -25,6 +25,7 @@ import com.google.mlkit.vision.barcode.common.Barcode;
 import com.google.mlkit.vision.common.InputImage;
 
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class QrScannerActivity extends AppCompatActivity {
@@ -34,6 +35,7 @@ public class QrScannerActivity extends AppCompatActivity {
     private static final int CAMERA_PERMISSION_REQUEST = 200;
 
     private PreviewView previewView;
+    private ExecutorService analysisExecutor;
     private final BarcodeScanner barcodeScanner = BarcodeScanning.getClient();
 
     @Override
@@ -70,16 +72,25 @@ public class QrScannerActivity extends AppCompatActivity {
         Preview preview = new Preview.Builder().build();
         preview.setSurfaceProvider(previewView.getSurfaceProvider());
 
+        analysisExecutor = Executors.newSingleThreadExecutor();
         ImageAnalysis analysis = new ImageAnalysis.Builder()
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build();
-        analysis.setAnalyzer(Executors.newSingleThreadExecutor(), this::analyze);
+        analysis.setAnalyzer(analysisExecutor, this::analyze);
 
         CameraSelector selector = new CameraSelector.Builder()
                 .requireLensFacing(CameraSelector.LENS_FACING_BACK)
                 .build();
 
         provider.bindToLifecycle(this, selector, preview, analysis);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (analysisExecutor != null) {
+            analysisExecutor.shutdown();
+        }
     }
 
     private void analyze(@NonNull ImageProxy imageProxy) {

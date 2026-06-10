@@ -87,7 +87,10 @@ public class SettingsActivity extends AppCompatActivity {
 
     private void saveBackgroundImage(Uri uri) {
         try (InputStream is = getContentResolver().openInputStream(uri)) {
-            Bitmap bitmap = BitmapFactory.decodeStream(is);
+            BitmapFactory.Options opts = new BitmapFactory.Options();
+            opts.inSampleSize = 2;
+            opts.inPreferredConfig = Bitmap.Config.RGB_565;
+            Bitmap bitmap = BitmapFactory.decodeStream(is, null, opts);
             if (bitmap == null) return;
 
             File bgFile = new File(getFilesDir(), "background.jpg");

@@ -91,10 +91,7 @@ function connectWs() {
     } else {
       try {
         const msg = JSON.parse(e.data);
-        if (msg.event === 'phone_disconnected') {
-          clearTimeout(frameTimeout);
-          showPlaceholder();
-        } else if (msg.type === 'state') {
+        if (msg.type === 'state') {
           if (msg.bg_blur !== undefined) setBtn('btnBg', msg.bg_blur);
           if (msg.filter !== undefined) setBtn('btnFilters', msg.filter !== 'none');
           if (msg.center_lock !== undefined) setBtn('btnCenter', msg.center_lock);

@@ -2,20 +2,26 @@ package com.example.ip_camera;
 
 import android.graphics.Bitmap;
 import android.graphics.ImageFormat;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageProxy;
 
 import java.io.ByteArrayOutputStream;
+import java.net.URI;
 
 public class CameraService implements ImageAnalysis.Analyzer {
 
+    private static final String TAG = "CameraService";
     private static final long MIN_INTERVAL_MS = 50;
+    private static final int UDP_PORT = 8001;
 
     private final NetworkClient networkClient;
     private final FrameProcessor frameProcessor;
+    private final UdpVideoSender udpSender = new UdpVideoSender();
     private final ByteArrayOutputStream jpegBaos = new ByteArrayOutputStream();
+    private final String serverUrl;
     private long lastUploadMs = 0;
     private int cameraRotation = 0;
     private byte[] nv21Buffer;
@@ -28,6 +34,7 @@ public class CameraService implements ImageAnalysis.Analyzer {
     private volatile boolean mirrorPreview = false;
 
     public CameraService(String serverUrl) {
+        this.serverUrl = serverUrl;
         networkClient = new NetworkClient(serverUrl);
         frameProcessor = new FrameProcessor();
     }
@@ -78,10 +85,17 @@ public class CameraService implements ImageAnalysis.Analyzer {
 
     public void start() {
         networkClient.start();
+        String host = extractHost(serverUrl);
+        try {
+            udpSender.start(host, UDP_PORT);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to start UDP sender", e);
+        }
     }
 
     public void stop() {
         networkClient.stop();
+        udpSender.stop();
         frameProcessor.close();
     }
 
@@ -110,7 +124,8 @@ public class CameraService implements ImageAnalysis.Analyzer {
         boolean needsProcessing = rotationDegrees != 0
                 || currentFilter != FilterConstants.NONE
                 || bgBlurEnabled
-                || centerLockEnabled;
+                || centerLockEnabled
+                || cameraRotation != 0;
 
         byte[] jpegBytes;
 
@@ -131,7 +146,16 @@ public class CameraService implements ImageAnalysis.Analyzer {
 
         if (jpegBytes != null) {
             lastUploadMs = now;
-            networkClient.sendFrame(jpegBytes);
+            udpSender.sendFrame(jpegBytes);
+        }
+    }
+
+    private static String extractHost(String url) {
+        try {
+            URI uri = new URI(url.replace("/upload", ""));
+            return uri.getHost();
+        } catch (Exception e) {
+            return "127.0.0.1";
         }
     }
 }

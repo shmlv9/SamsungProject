@@ -36,6 +36,7 @@ class FrameProcessor {
     private Segmenter segmenter;
     private FaceDetector faceDetector;
     private final Paint filterPaint = new Paint();
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private Rect lastCenterCropRect = null;
     private int centerLockFrameCounter = 0;
     private ProcessedFrameListener processedFrameListener;
@@ -101,18 +102,20 @@ class FrameProcessor {
             if (cameraRotation != 0) {
                 Matrix rot = new Matrix();
                 rot.postRotate(cameraRotation);
-                preview = Bitmap.createBitmap(preview, 0, 0, preview.getWidth(), preview.getHeight(), rot, true);
+                preview = Bitmap.createBitmap(preview, 0, 0,
+                        preview.getWidth(), preview.getHeight(), rot, true);
             }
             if (mirrorPreview) {
-                Matrix mirror = new Matrix();
-                mirror.preScale(-1, 1);
-                Bitmap mirrored = Bitmap.createBitmap(preview, 0, 0, preview.getWidth(), preview.getHeight(), mirror, false);
+                Matrix m = new Matrix();
+                m.preScale(-1, 1);
+                Bitmap mirrored = Bitmap.createBitmap(preview, 0, 0,
+                        preview.getWidth(), preview.getHeight(), m, false);
                 if (preview != bitmap) preview.recycle();
                 preview = mirrored;
             }
             Bitmap previewCopy = preview.copy(Bitmap.Config.ARGB_8888, false);
             if (preview != bitmap) preview.recycle();
-            new Handler(Looper.getMainLooper()).post(() -> processedFrameListener.onFrame(previewCopy));
+            mainHandler.post(() -> processedFrameListener.onFrame(previewCopy));
         }
 
         if (rotationDegrees != 0) {
@@ -188,28 +191,14 @@ class FrameProcessor {
     }
 
     private static Bitmap scaleBitmapPass(Bitmap src, int width, int height) {
-        Bitmap tmp = Bitmap.createScaledBitmap(src, width / 2, height / 2, true);
-        Bitmap out = Bitmap.createScaledBitmap(tmp, width / 4, height / 4, true);
-        tmp.recycle();
-        tmp = out;
-        out = Bitmap.createScaledBitmap(tmp, width / 2, height / 2, true);
-        tmp.recycle();
-        tmp = out;
-        out = Bitmap.createScaledBitmap(tmp, width, height, true);
-        tmp.recycle();
-        tmp = out;
-        out = Bitmap.createScaledBitmap(tmp, width / 2, height / 2, true);
-        tmp.recycle();
-        tmp = out;
-        out = Bitmap.createScaledBitmap(tmp, width / 4, height / 4, true);
-        tmp.recycle();
-        tmp = out;
-        out = Bitmap.createScaledBitmap(tmp, width / 2, height / 2, true);
-        tmp.recycle();
-        tmp = out;
-        out = Bitmap.createScaledBitmap(tmp, width, height, true);
-        tmp.recycle();
-        return out;
+        int[] denoms = {2, 4, 2, 1, 2, 4, 2, 1};
+        Bitmap prev = src;
+        for (int d : denoms) {
+            Bitmap next = Bitmap.createScaledBitmap(prev, width / d, height / d, true);
+            if (prev != src) prev.recycle();
+            prev = next;
+        }
+        return prev;
     }
 
     private Bitmap applyCenterLock(Bitmap bitmap) {
